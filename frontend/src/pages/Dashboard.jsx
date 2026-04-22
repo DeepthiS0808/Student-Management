@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, RefreshCw, Filter } from 'lucide-react';
+import { Plus, Search, RefreshCw, Filter, Users, BookOpen, Award } from 'lucide-react';
 import StudentTable from '../components/StudentTable';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Button from '../components/Button';
@@ -63,6 +63,24 @@ const Dashboard = () => {
             <Plus className="h-5 w-5" /> Add Student
           </Button>
         </div>
+      </div>
+
+      {/* Quick Stats Widgets */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+        {[
+          { label: 'Total Students', value: students.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Courses Active', value: '12', icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Average Grade', value: 'A-', icon: Award, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+          { label: 'Attendance', value: '94%', icon: Filter, color: 'text-green-600', bg: 'bg-green-50' }, // Reusing Filter as icon placeholder
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/50 shadow-sm group hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
+            <div className={`h-12 w-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform`}>
+              <stat.icon className="h-6 w-6" />
+            </div>
+            <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
+            <div className="text-3xl font-black text-slate-900 mt-1">{stat.value}</div>
+          </div>
+        ))}
       </div>
 
       {/* Search and Filters */}

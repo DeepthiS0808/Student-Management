@@ -41,11 +41,15 @@ export default {
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
         }
       },
       animation: {
         float: 'float 6s ease-in-out infinite',
         fadeIn: 'fadeIn 0.5s ease-out forwards',
+        shimmer: 'shimmer 2s infinite',
       }
     },
   },

@@ -8,7 +8,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Add Student', path: '/add', icon: UserPlus },
+    { name: 'Profile', path: '/profile', icon: UserPlus }, // Reusing UserPlus for now or User
   ];
 
   return (

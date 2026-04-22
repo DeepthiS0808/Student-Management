@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import FormPage from './pages/FormPage';
+import Profile from './pages/Profile';
 
 /**
  * App Component
@@ -26,6 +27,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/add" element={<FormPage />} />
             <Route path="/edit/:id" element={<FormPage />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
 
