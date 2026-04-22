@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GraduationCap, ArrowLeft, Info } from 'lucide-react';
 import StudentForm from '../components/StudentForm';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Toast from '../components/Toast';
 import { studentService } from '../services/studentService';
 
 const FormPage = () => {
@@ -12,6 +13,7 @@ const FormPage = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const isEdit = !!id;
 
@@ -45,10 +47,16 @@ const FormPage = () => {
     try {
       if (isEdit) {
         await studentService.update(id, formData);
+        setToast({ message: 'Student updated successfully!', type: 'success' });
       } else {
         await studentService.create(formData);
+        setToast({ message: 'Student registered successfully!', type: 'success' });
       }
-      navigate('/dashboard');
+      
+      // Navigate after toast is visible for a moment
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (err) {
       console.error('Error saving student:', err);
       setError(err.message || 'Failed to save student record.');
@@ -60,6 +68,7 @@ const FormPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       <button 
         onClick={() => navigate('/dashboard')}
         className="flex items-center gap-2 text-slate-500 hover:text-primary-600 transition-colors mb-8 group"

@@ -4,12 +4,14 @@ import { Plus, Search, RefreshCw, Filter, Users, BookOpen, Award } from 'lucide-
 import StudentTable from '../components/StudentTable';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Button from '../components/Button';
+import Toast from '../components/Toast';
 import { studentService } from '../services/studentService';
 
 const Dashboard = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
@@ -17,35 +19,43 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await studentService.getAll();
+      const response = await studentService.getAll();
       // Backend returns { success: true, data: [...] }
-      setStudents(data || []);
+      setStudents(response.data || []);
     } catch (err) {
       console.error('Error fetching students:', err);
-      setError('Failed to load students. Please ensure the backend is running.');
+      setError('Failed to load students. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchStudents();
   }, []);
 
-  // Compute filtered students during render (Best Practice)
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this student?')) return;
+
+    // 1. Optimistic Update (UI change first)
+    const originalStudents = [...students];
+    setStudents(students.filter(s => s.id !== id));
+    setToast({ message: 'Student removed (Syncing...)', type: 'success' });
+
+    try {
+      // 2. API Call
+      await studentService.delete(id);
+      setToast({ message: 'Student deleted permanently', type: 'success' });
+    } catch (err) {
+      // 3. Rollback on failure
+      setStudents(originalStudents);
+      setToast({ message: 'Failed to delete student. Reverting...', type: 'error' });
+    }
   const filteredStudents = students.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.course.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      await studentService.delete(id);
-      fetchStudents();
-    }
-  };
 
   const handleEdit = (student) => {
     navigate(`/edit/${student.id}`);
@@ -53,6 +63,7 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fadeIn">
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Student Universe</h1>
