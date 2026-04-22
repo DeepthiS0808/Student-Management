@@ -5,6 +5,20 @@ import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import FormPage from './pages/FormPage';
 import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import { authService } from './services/authService';
+import { Navigate } from 'react-router-dom';
+
+/**
+ * ProtectedRoute Component
+ */
+const ProtectedRoute = ({ children }) => {
+  if (!authService.isAuthenticated()) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 /**
  * App Component
@@ -24,10 +38,30 @@ function App() {
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add" element={<FormPage />} />
-            <Route path="/edit/:id" element={<FormPage />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/add" element={
+              <ProtectedRoute>
+                <FormPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit/:id" element={
+              <ProtectedRoute>
+                <FormPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
           </Routes>
         </div>
 

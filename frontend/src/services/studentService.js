@@ -6,6 +6,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 /**
+ * Get standard headers with Auth token
+ */
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
+/**
  * Handle API responses and throw errors for non-2xx status codes
  */
 const handleResponse = async (response) => {
@@ -28,7 +39,9 @@ export const studentService = {
    */
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/students`);
+      const response = await fetch(`${API_BASE_URL}/students`, {
+        headers: getHeaders()
+      });
       return await handleResponse(response);
     } catch (error) {
       console.error('Error in getAll:', error);
@@ -41,7 +54,9 @@ export const studentService = {
    */
   getById: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/students/${id}`);
+      const response = await fetch(`${API_BASE_URL}/students/${id}`, {
+        headers: getHeaders()
+      });
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error in getById(${id}):`, error);
@@ -56,9 +71,7 @@ export const studentService = {
     try {
       const response = await fetch(`${API_BASE_URL}/students`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify(studentData),
       });
       return await handleResponse(response);
@@ -75,9 +88,7 @@ export const studentService = {
     try {
       const response = await fetch(`${API_BASE_URL}/students/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify(studentData),
       });
       return await handleResponse(response);
@@ -94,6 +105,7 @@ export const studentService = {
     try {
       const response = await fetch(`${API_BASE_URL}/students/${id}`, {
         method: 'DELETE',
+        headers: getHeaders(),
       });
       return await handleResponse(response);
     } catch (error) {

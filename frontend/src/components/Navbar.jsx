@@ -1,14 +1,24 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap, LayoutDashboard, Home, UserPlus } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { GraduationCap, LayoutDashboard, Home, User, LogOut, LogIn, UserPlus } from 'lucide-react';
+import { authService } from '../services/authService';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const isAuthenticated = authService.isAuthenticated();
+  const user = authService.getCurrentUser();
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+    window.location.reload();
+  };
 
   const navLinks = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Profile', path: '/profile', icon: UserPlus }, // Reusing UserPlus for now or User
+    { name: 'Home', path: '/', icon: Home, show: true },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, show: isAuthenticated },
+    { name: 'Profile', path: '/profile', icon: User, show: isAuthenticated },
   ];
 
   return (
@@ -27,7 +37,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-1 sm:space-x-4">
-            {navLinks.map((link) => {
+            {navLinks.filter(link => link.show).map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path;
               return (
@@ -45,6 +55,33 @@ const Navbar = () => {
                 </Link>
               );
             })}
+
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden md:block">Logout</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary-600 hover:bg-primary-50 transition-colors duration-200"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden md:block">Login</span>
+                </Link>
+                <Link
+                  to="/signup"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 shadow-md"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span className="hidden md:block">Sign Up</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
