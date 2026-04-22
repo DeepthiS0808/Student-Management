@@ -11,6 +11,7 @@ const FormPage = () => {
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const isEdit = !!id;
 
@@ -18,16 +19,18 @@ const FormPage = () => {
     if (isEdit) {
       const fetchStudent = async () => {
         setPageLoading(true);
+        setError(null);
         try {
-          const data = await studentService.getById(id);
-          if (data) {
-            setInitialData(data);
+          const response = await studentService.getById(id);
+          // Backend returns { success: true, data: {...} }
+          if (response && response.data) {
+            setInitialData(response.data);
           } else {
-            navigate('/dashboard');
+            setError('Student not found.');
           }
-        } catch (error) {
-          console.error('Error fetching student:', error);
-          navigate('/dashboard');
+        } catch (err) {
+          console.error('Error fetching student:', err);
+          setError('Failed to load student data. Is the backend running?');
         } finally {
           setPageLoading(false);
         }
@@ -38,6 +41,7 @@ const FormPage = () => {
 
   const handleSubmit = async (formData) => {
     setLoading(true);
+    setError(null);
     try {
       if (isEdit) {
         await studentService.update(id, formData);
@@ -45,9 +49,9 @@ const FormPage = () => {
         await studentService.create(formData);
       }
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Error saving student:', error);
-    } finally {
+    } catch (err) {
+      console.error('Error saving student:', err);
+      setError(err.message || 'Failed to save student record.');
       setLoading(false);
     }
   };
@@ -84,6 +88,16 @@ const FormPage = () => {
         </div>
 
         <div className="p-8 md:p-12">
+          {error && (
+            <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center justify-between text-red-800 text-sm animate-fadeIn">
+              <div className="flex items-center gap-3">
+                <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span>{error}</span>
+              </div>
+              {isEdit && <Button variant="secondary" className="text-xs py-1" onClick={() => navigate(0)}>Reload</Button>}
+            </div>
+          )}
+
           {/* Tips/Info */}
           <div className="mb-8 p-4 bg-primary-50 border border-primary-100 rounded-xl flex gap-3 text-primary-800 text-sm">
             <Info className="h-5 w-5 shrink-0" />

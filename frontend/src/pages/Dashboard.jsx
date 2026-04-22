@@ -9,16 +9,20 @@ import { studentService } from '../services/studentService';
 const Dashboard = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   const fetchStudents = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await studentService.getAll();
-      setStudents(data);
-    } catch (error) {
-      console.error('Error fetching students:', error);
+      const { data } = await studentService.getAll();
+      // Backend returns { success: true, data: [...] }
+      setStudents(data || []);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      setError('Failed to load students. Please ensure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -114,6 +118,16 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-8 flex items-center justify-between animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+              <span className="font-semibold">{error}</span>
+            </div>
+            <Button variant="danger" className="text-xs py-1" onClick={fetchStudents}>Retry</Button>
+          </div>
+        )}
+
         {loading ? (
           <LoadingSpinner fullPage />
         ) : (

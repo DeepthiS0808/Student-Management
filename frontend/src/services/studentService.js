@@ -1,88 +1,99 @@
 /**
- * Mock Student Service
- * Simulates API calls with async/await and setTimeout.
- * Uses localStorage for persistence during the session.
+ * Student Service
+ * Handles API calls to the Student Management Backend using fetch.
  */
 
-const STORAGE_KEY = 'sms_students';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-const initialData = [
-  { id: '1', name: 'Alice Johnson', age: 20, course: 'Computer Science' },
-  { id: '2', name: 'Bob Smith', age: 22, course: 'Information Technology' },
-  { id: '3', name: 'Charlie Brown', age: 21, course: 'Mechanical Engineering' },
-];
-
-const getStudentsFromStorage = () => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : initialData;
-};
-
-const saveStudentsToStorage = (students) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+/**
+ * Handle API responses and throw errors for non-2xx status codes
+ */
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.message || `API Error: ${response.status} ${response.statusText}`;
+    throw new Error(errorMessage);
+  }
+  return response.json();
 };
 
 export const studentService = {
-  // Simulate fetching all students
+  /**
+   * Fetch all students from the database
+   */
   getAll: async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getStudentsFromStorage());
-      }, 800); // 800ms delay to simulate network
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/students`);
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Error in getAll:', error);
+      throw error;
+    }
   },
 
-  // Simulate fetching a single student by ID
+  /**
+   * Fetch a single student by ID
+   */
   getById: async (id) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const students = getStudentsFromStorage();
-        resolve(students.find((s) => s.id === id));
-      }, 500);
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${id}`);
+      return await handleResponse(response);
+    } catch (error) {
+      console.error(`Error in getById(${id}):`, error);
+      throw error;
+    }
   },
 
-  // Simulate adding a new student
+  /**
+   * Create a new student registration
+   */
   create: async (studentData) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const students = getStudentsFromStorage();
-        const newStudent = {
-          ...studentData,
-          id: Math.random().toString(36).substr(2, 9),
-        };
-        const updatedStudents = [...students, newStudent];
-        saveStudentsToStorage(updatedStudents);
-        resolve(newStudent);
-      }, 1000);
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/students`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(studentData),
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Error in create:', error);
+      throw error;
+    }
   },
 
-  // Simulate updating an existing student
+  /**
+   * Update an existing student's data
+   */
   update: async (id, studentData) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const students = getStudentsFromStorage();
-        const index = students.findIndex((s) => s.id === id);
-        if (index !== -1) {
-          students[index] = { ...students[index], ...studentData };
-          saveStudentsToStorage(students);
-          resolve(students[index]);
-        } else {
-          resolve(null);
-        }
-      }, 1000);
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(studentData),
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error(`Error in update(${id}):`, error);
+      throw error;
+    }
   },
 
-  // Simulate deleting a student
+  /**
+   * Delete a student by ID
+   */
   delete: async (id) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const students = getStudentsFromStorage();
-        const updatedStudents = students.filter((s) => s.id !== id);
-        saveStudentsToStorage(updatedStudents);
-        resolve(true);
-      }, 700);
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${id}`, {
+        method: 'DELETE',
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error(`Error in delete(${id}):`, error);
+      throw error;
+    }
   },
 };
