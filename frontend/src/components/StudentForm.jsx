@@ -34,7 +34,10 @@ const StudentForm = ({ initialData, onSubmit, onCancel, loading }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Convert age to number if it's the age field
+    const finalValue = name === 'age' ? (value === '' ? '' : Number(value)) : value;
+    
+    setFormData((prev) => ({ ...prev, [name]: finalValue }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));

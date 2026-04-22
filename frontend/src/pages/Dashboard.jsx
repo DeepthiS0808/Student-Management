@@ -4,14 +4,12 @@ import { Plus, Search, RefreshCw, Filter, Users, BookOpen, Award } from 'lucide-
 import StudentTable from '../components/StudentTable';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Button from '../components/Button';
-import Toast from '../components/Toast';
 import { studentService } from '../services/studentService';
 
 const Dashboard = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [toast, setToast] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
@@ -24,7 +22,7 @@ const Dashboard = () => {
       setStudents(response.data || []);
     } catch (err) {
       console.error('Error fetching students:', err);
-      setError('Failed to load students. Please check your connection.');
+      setError('Failed to load students. Please ensure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -34,28 +32,19 @@ const Dashboard = () => {
     fetchStudents();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this student?')) return;
-
-    // 1. Optimistic Update (UI change first)
-    const originalStudents = [...students];
-    setStudents(students.filter(s => s.id !== id));
-    setToast({ message: 'Student removed (Syncing...)', type: 'success' });
-
-    try {
-      // 2. API Call
-      await studentService.delete(id);
-      setToast({ message: 'Student deleted permanently', type: 'success' });
-    } catch (err) {
-      // 3. Rollback on failure
-      setStudents(originalStudents);
-      setToast({ message: 'Failed to delete student. Reverting...', type: 'error' });
-    }
+  // Compute filtered students during render
   const filteredStudents = students.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.course.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this student?')) {
+      await studentService.delete(id);
+      fetchStudents();
+    }
+  };
 
   const handleEdit = (student) => {
     navigate(`/edit/${student.id}`);
@@ -63,7 +52,6 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fadeIn">
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Student Universe</h1>
@@ -86,7 +74,7 @@ const Dashboard = () => {
           { label: 'Total Students', value: students.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Courses Active', value: '12', icon: BookOpen, color: 'text-purple-600', bg: 'bg-purple-50' },
           { label: 'Average Grade', value: 'A-', icon: Award, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-          { label: 'Attendance', value: '94%', icon: Filter, color: 'text-green-600', bg: 'bg-green-50' }, // Reusing Filter as icon placeholder
+          { label: 'Attendance', value: '94%', icon: Filter, color: 'text-green-600', bg: 'bg-green-50' },
         ].map((stat, i) => (
           <div key={i} className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white/50 shadow-sm group hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
             <div className={`h-12 w-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform`}>

@@ -8,7 +8,7 @@ const errorHandler = require("../middlewares/error.middleware");
 const notFound = require("../middlewares/notFound.middleware");
 
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5177"],
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));

@@ -11,6 +11,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    // If validation errors exist, include them in the error message
+    if (errorData.errors && errorData.errors.length > 0) {
+      const errorMessage = errorData.errors.join(', ');
+      throw new Error(errorMessage);
+    }
     const errorMessage = errorData.message || `API Error: ${response.status} ${response.statusText}`;
     throw new Error(errorMessage);
   }
